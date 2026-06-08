@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語自走式学習システム｜Unit 48</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Lato:wght@400;700;900&display=swap');
+  :root {
+    --blue: #1a4fa0; --orange: #e8630a; --light-blue: #e8f0fb; --light-orange: #fff3e8;
+    --green: #1a7a3c; --light-green: #e8f5ee; --gray: #555; --light-gray: #f5f5f5;
+    --border: #ddd; --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #222; font-size: 15px; line-height: 1.7; }
+  .header { background: var(--blue); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .unit-badge { background: var(--orange); color: white; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 22px; width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-title h1 { font-size: 17px; font-weight: 700; }
+  .header-title p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 4px; }
+  .progress-bar-fill { background: var(--orange); height: 4px; transition: width 0.4s ease; width: 0%; }
+  .steps-nav { background: white; border-bottom: 2px solid var(--border); overflow-x: auto; }
+  .steps-nav-inner { max-width: 860px; margin: 0 auto; display: flex; padding: 0 20px; }
+  .step-tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: #888; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; user-select: none; }
+  .step-tab:hover { color: var(--blue); }
+  .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .step-tab.done { color: var(--green); }
+  .step-tab.done::before { content: '✓ '; font-size: 11px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .step-intro { background: var(--light-blue); border-left: 4px solid var(--blue); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #333; }
+  .step-intro strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--blue); }
+  .flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; font-size: 13px; }
+  .flow-item { background: var(--blue); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+  .flow-arrow { color: var(--blue); font-weight: 700; }
+  .listen-btn { display: flex; align-items: center; gap: 10px; background: var(--orange); color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s, transform 0.1s; margin-bottom: 10px; }
+  .listen-btn:hover { background: #c7550a; transform: translateY(-1px); }
+  .done-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; }
+  .done-btn:hover { background: #145e2d; }
+  .para-number { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: white; width: 26px; height: 26px; border-radius: 50%; font-weight: 900; font-family: 'Lato', sans-serif; font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+  .para-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .para-topic { font-size: 14px; font-weight: 700; color: white; background: var(--blue); padding: 3px 10px; border-radius: 4px; }
+  .english-text { font-family: 'Lato', sans-serif; font-size: 16px; line-height: 1.9; color: #1a1a1a; background: #fafafa; border-radius: 8px; padding: 16px; border: 1px solid #e8eaed; margin-bottom: 14px; }
+  .english-text .idiom { color: var(--orange); font-weight: 700; }
+  .english-text .grammar { color: var(--blue); font-weight: 700; }
+  .japanese-text { font-size: 14px; color: #444; line-height: 1.8; padding: 12px 16px; background: #fffdf5; border-radius: 8px; border-left: 3px solid var(--orange); margin-bottom: 16px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .vocab-item { display: flex; align-items: baseline; gap: 6px; background: var(--light-blue); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
+  .vocab-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue); }
+  .vocab-sep { color: #aaa; font-size: 12px; }
+  .vocab-ja { color: #333; font-size: 13px; }
+  .idiom-list { display: flex; flex-direction: column; gap: 6px; }
+  .idiom-item { display: flex; align-items: baseline; gap: 8px; background: var(--light-orange); border-radius: 6px; padding: 8px 12px; font-size: 14px; flex-wrap: wrap; }
+  .idiom-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--orange); }
+  .idiom-ja { color: #444; font-size: 13px; }
+  .grammar-box { background: #f0f4ff; border: 1px solid #b8c8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 14px; }
+  .grammar-box .g-title { font-weight: 700; background: var(--blue); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+  .grammar-box .g-sentence { font-family: 'Lato', sans-serif; font-size: 15px; color: #1a1a1a; margin-bottom: 8px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid var(--blue); }
+  .grammar-box .g-note { font-size: 13px; color: #555; line-height: 1.7; }
+  .check-box { background: var(--light-green); border: 1px solid #a8d8b8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .check-box .check-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .check-q { font-size: 14px; color: #333; }
+  .check-a-btn { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--green); color: var(--green); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; margin-top: 4px; }
+  .check-a-btn:hover { background: var(--green); color: white; }
+  .check-answer { display: none; background: white; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 14px; color: #222; margin-top: 6px; animation: fadeIn 0.3s ease; }
+  .check-answer.visible { display: block; }
+  .check-answer .a-label { color: var(--green); font-weight: 700; margin-right: 4px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .quiz-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .quiz-q { font-size: 15px; color: #222; margin-bottom: 14px; font-weight: 500; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .quiz-opt:hover { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.selected { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.correct { border-color: var(--green); background: var(--light-green); }
+  .quiz-opt.wrong { border-color: var(--red); background: #fdecea; }
+  .quiz-opt .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .quiz-feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; animation: fadeIn 0.3s ease; }
+  .quiz-feedback.correct-fb { background: var(--light-green); color: var(--green); border-left: 3px solid var(--green); display: block; }
+  .quiz-feedback.wrong-fb { background: #fdecea; color: var(--red); border-left: 3px solid var(--red); display: block; }
+  .submit-quiz-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .submit-quiz-btn:hover { background: #143d80; }
+  .quiz-result { display: none; background: var(--light-blue); border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; animation: fadeIn 0.4s ease; }
+  .quiz-result .score { font-size: 40px; font-weight: 900; color: var(--blue); font-family: 'Lato', sans-serif; }
+  .quiz-result .score-label { font-size: 14px; color: #666; margin-bottom: 12px; }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .next-step-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; width: 100%; margin-top: 8px; }
+  .next-step-btn:hover { background: #143d80; }
+  .completion-banner { background: linear-gradient(135deg, var(--green), #2ecc71); color: white; border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+  .completion-banner h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .completion-banner p { font-size: 14px; opacity: 0.9; }
+  @media (max-width: 600px) { .vocab-grid { grid-template-columns: 1fr 1fr; } .english-text { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="unit-badge">48</div>
+    <div class="header-title">
+      <h1>Social Media: Advantages and Disadvantages</h1>
+      <p>SNSのメリット・デメリット・243 words</p>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+</div>
+
+<div class="steps-nav">
+  <div class="steps-nav-inner">
+    <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
+    <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
+    <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-section active" id="step0">
+    <div class="card">
+      <div class="card-title"><span>🔊</span> Step 1｜通しリスニング</div>
+      <div class="step-intro">
+        <strong>最初は本文を見ないで通して聞いてみましょう</strong>
+        下の流れを意識しながら聞いてみよう。
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-item">SNSとは</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">学校での活用</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">デメリット・危険</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">親子のルール作り</div>
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（1回目）</button>
+      <audio id="audioPlayer" src="sokujukure142_eibun48.mp3" style="width:100%; margin-bottom:14px; display:block; border-radius:8px;"></audio>
+      <div class="step-intro" style="background:#fff3e8; border-left-color: var(--orange);">
+        <strong>次は本文を見ながら通して聞いてみましょう</strong>
+        内容を意識しながら聞こう。英文と日本語訳は Step 2 で確認できます。
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（2回目）</button>
+      <br>
+      <button class="done-btn" onclick="completeStep(0)">✓ リスニング完了 → 次へ</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section" id="step1">
+
+    <!-- Para 1 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">1</span>
+        <span class="para-topic">SNSとは何か</span>
+      </div>
+      <div class="english-text">
+        We now live in the age of social media. Most people <span class="idiom">accept</span> it <span class="idiom">as</span> a part of everyday life. Social media is a great way to <span class="idiom">get in touch with</span> people, and most services can be used <span class="idiom">free of charge</span> because they are paid for with advertising. These days, many people <span class="idiom">look to</span> social media as a means of entertainment, communication, and even emotional support.
+      </div>
+      <div class="japanese-text">
+        今、私たちはソーシャルメディアの時代に生きている。多くの人はそれを日常生活の一部として受け入れている。ソーシャルメディアは人とつながるための優れた手段であり、ほとんどのサービスが広告費で賄われているため無料で使うことができる。最近は、多くの人が娯楽、コミュニケーション、そして時に感情的な支えの手段としてソーシャルメディアを当てにしている。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">means</span><span class="vocab-sep">｜</span><span class="vocab-ja">手段；財力</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">accept A as B</span><span class="idiom-ja">AをBとして認める；受け入れる</span></div>
+        <div class="idiom-item"><span class="idiom-en">get in touch with ~</span><span class="idiom-ja">〜と連絡を取る</span></div>
+        <div class="idiom-item"><span class="idiom-en">free of charge</span><span class="idiom-ja">無料で</span></div>
+        <div class="idiom-item"><span class="idiom-en">look to ~ (for ...)</span><span class="idiom-ja">（…を求めるのに）〜を頼みにする</span></div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q1</strong> SNSのサービスがほとんど無料な理由は何か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>広告費で賄われているから。</div>
+      </div>
+    </div>
+
+    <!-- Para 2 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">2</span>
+        <span class="para-topic">学校での活用</span>
+      </div>
+      <div class="english-text">
+        Students can use social media for school-related purposes in various ways. They can easily <span class="idiom">ask a favor of</span> their classmates, such as asking them to <span class="idiom">pick up</span> homework or other things when they <span class="idiom">are absent from</span> school. Some schools even <span class="grammar">let students</span> submit homework via chat apps.
+      </div>
+      <div class="japanese-text">
+        生徒はソーシャルメディアを学校関連の目的で、さまざまな用途で活用することができる。クラスメートに頼みごとをすることも容易だ。例えば、学校を欠席した時に宿題などを受け取ってもらうよう頼むことができる。学校によっては、生徒がチャットアプリで宿題を提出できるようにしているところもある。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">submit</span><span class="vocab-sep">｜</span><span class="vocab-ja">を提出する</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">ask a favor of ~</span><span class="idiom-ja">〜にお願いする〔頼む〕</span></div>
+        <div class="idiom-item"><span class="idiom-en">pick up ~</span><span class="idiom-ja">〜を取り上げる；〜（預けてあるもの）を受け取る</span></div>
+        <div class="idiom-item"><span class="idiom-en">be absent from ~</span><span class="idiom-ja">〜を欠席している</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法①｜let O do（使役動詞）</div>
+        <div class="g-sentence">Some schools even <u>let students submit</u> homework via chat apps.</div>
+        <div class="g-note"><strong>let O do</strong> で「Oに…させる（許可）」という使役の表現。「生徒がチャットアプリで宿題を提出できるようにしている」という意味。→ 動詞③b</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q2</strong> 欠席した時にSNSをどう活用できるか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>クラスメートに宿題などを受け取ってもらうよう頼むことができる。</div>
+      </div>
+    </div>
+
+    <!-- Para 3 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">3</span>
+        <span class="para-topic">デメリット・危険性</span>
+      </div>
+      <div class="english-text">
+        On the other hand, parents cannot monitor their children's social media behavior all the time they are using it. Some students check their phones <span class="grammar">as</span> often <span class="grammar">as hundreds of times</span> a day. Conflict and peer pressure on social media can make it hard for students to <span class="idiom">get along</span>, leading to fights or bullying. And there are bad people on social media who <span class="idiom">are intent on</span> harming children in various ways.
+      </div>
+      <div class="japanese-text">
+        一方で親は、子供がソーシャルメディアを使っている間ずっとそこでの言動を監視しておくことはできない。生徒の中には、1日に何百回もスマホをチェックする者もいる。ソーシャルメディア上でのいさかいや同調圧力によって生徒たちは仲良くやっていくのが難しくなる場合もあり、それがケンカやいじめに発展することもある。そして、ソーシャルメディア上には、さまざまな方法で子供に害をなそうとたくらんでいる悪人も存在している。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">monitor</span><span class="vocab-sep">｜</span><span class="vocab-ja">を監視する</span></div>
+        <div class="vocab-item"><span class="vocab-en">conflict</span><span class="vocab-sep">｜</span><span class="vocab-ja">争い・対立</span></div>
+        <div class="vocab-item"><span class="vocab-en">peer</span><span class="vocab-sep">｜</span><span class="vocab-ja">仲間・貴族</span></div>
+        <div class="vocab-item"><span class="vocab-en">bullying</span><span class="vocab-sep">｜</span><span class="vocab-ja">いじめ</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">get along (with ~)</span><span class="idiom-ja">（〜と）うまくやっていく；暮らしていく</span></div>
+        <div class="idiom-item"><span class="idiom-en">be intent on [upon] ~</span><span class="idiom-ja">〜に没頭している；〜をたくらんでいる</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法②｜as ～ as ＋数詞（…と同じほど〜も）</div>
+        <div class="g-sentence">check their phones <u>as often as hundreds of times</u> a day</div>
+        <div class="g-note"><strong>as ～ as ＋数詞</strong> で「（…と同じほど）〜も」という意味。「1日に何百回もスマホをチェックする」という驚きの量を表している。→ 比較①a</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q3</strong> SNSの危険性として挙げられているものを2つ答えよ。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>①いじめ・ケンカなどの対立　②悪意ある大人による子どもへの害</div>
+      </div>
+    </div>
+
+    <!-- Para 4 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">4</span>
+        <span class="para-topic">親子のルール作り</span>
+      </div>
+      <div class="english-text">
+        Parents may feel like they are <span class="idiom">behind the times</span> when it comes to social media communications. However, parents and their children should <span class="idiom">decide upon</span> rules, such as limits for use. Meanwhile, students should keep the promises they make with adults. They should <span class="idiom">stay away from</span> harmful people and never share photos or information they wouldn't want to be seen <span class="idiom">in public</span>.
+      </div>
+      <div class="japanese-text">
+        親は、ソーシャルメディアでのコミュニケーションとなると、時代についていけないと感じているかもしれない。しかし、親と子は共に、使用制限などのルールを設定すべきだ。と同時に、生徒は大人と交わした約束をしっかり守るようにしなければならない。有害な人間には近づかないようにし、衆目にさらされたくないような写真や情報は決して共有しないようにすべきである。
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">behind the times</span><span class="idiom-ja">時代遅れの</span></div>
+        <div class="idiom-item"><span class="idiom-en">decide on [upon] ~</span><span class="idiom-ja">〜を選ぶ；〜を決定する</span></div>
+        <div class="idiom-item"><span class="idiom-en">stay away from ~</span><span class="idiom-ja">〜に近づかない；〜を欠席する</span></div>
+        <div class="idiom-item"><span class="idiom-en">in public</span><span class="idiom-ja">人前で；公然と</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法③｜並列関係（they should ～ and never ～）</div>
+        <div class="g-sentence">They should <u>stay away from</u> harmful people <u>and never share</u> photos or information they wouldn't want to be seen in public.</div>
+        <div class="g-note"><strong>they should</strong> を主語とする動詞 <strong>stay away from</strong> と <strong>never share</strong> が <strong>and</strong> で並列されている。→ 関係代名詞②b</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q4</strong> 生徒はSNS上でどんなことを心がけるべきか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>有害な人間に近づかず、人前に出したくない写真や情報を共有しないこと。</div>
+      </div>
+    </div>
+
+    <div class="card" style="background: var(--light-blue);">
+      <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:10px;">【15字要約】</div>
+      <div style="font-size:20px; font-weight:900; color:#222; letter-spacing:0.05em;">SNSは便利だが危険もある</div>
+    </div>
+
+    <button class="next-step-btn" onclick="completeStep(1)">Step 3｜確認クイズへ →</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section" id="step2">
+    <div class="card">
+      <div class="card-title"><span>📝</span> Step 3｜確認クイズ</div>
+      <p style="font-size:14px; color:#666; margin-bottom:20px;">本文の内容を確認しましょう。各問題の選択肢を選んでから「採点する」を押してね。</p>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q1.</strong> Why can most social media services be used for free?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">A</div> Because the government pays for them.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="true"><div class="opt-letter">B</div> Because they are paid for with advertising.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">C</div> Because schools provide them for students.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">D</div> Because users pay a small monthly fee.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q2.</strong> According to the text, what is one disadvantage of social media for students?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">A</div> Students cannot submit homework online.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="true"><div class="opt-letter">B</div> Conflict and peer pressure can lead to fights or bullying.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">C</div> Students spend too much time on school work.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">D</div> Social media makes it easier to get in touch with teachers.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q3.</strong> 次のイディオムの意味として正しいものを選べ。<br><br><em>be intent on ~</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">A</div> 〜を欠席している</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">B</div> 〜と連絡を取る</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="true"><div class="opt-letter">C</div> 〜に没頭している；〜をたくらんでいる</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">D</div> 〜に近づかない</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q4.</strong> What should parents and children do together about social media?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">A</div> They should stop using social media entirely.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="true"><div class="opt-letter">B</div> They should decide upon rules, such as limits for use.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">C</div> Parents should monitor all their children's posts.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">D</div> Children should only use social media at school.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q5.</strong> 空欄に入る最も適切な語を選べ。<br><br><em>Social media is a great way to get in ______ with people.</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">A</div> contact</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="true"><div class="opt-letter">B</div> touch</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">C</div> line</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">D</div> reach</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+
+      <button class="submit-quiz-btn" onclick="submitQuiz()">採点する</button>
+
+      <div class="quiz-result" id="quizResult">
+        <div class="score" id="scoreNum">0/5</div>
+        <div class="score-label">正解数</div>
+        <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
+      </div>
+
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section" id="step3">
+    <div class="card">
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
+      <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
+        <div style="font-size:20px; font-weight:900; color:#222;">SNSは便利だが危険もある</div>
+      </div>
+      <div class="step-intro">
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">14</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
+      </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+    </div>
+    <div class="completion-banner" id="completionBanner" style="display:none;">
+      <h2>🎉 Unit 48 完了！</h2>
+      <p>お疲れ様でした。SNSのメリット・デメリットについて学習しました。<br>次のユニットへ進みましょう！</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const stepDone=[false,false,false,false];
+  const quizAnswers={q1:null,q2:null,q3:null,q4:null,q5:null};
+  const correctAnswers={q1:false,q2:false,q3:false,q4:false,q5:false};
+
+  function goToStep(n){
+    document.querySelectorAll('.step-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+    document.querySelectorAll('.step-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  }
+  function completeStep(n){
+    stepDone[n]=true;
+    const tab=document.getElementById('tab'+n);
+    tab.classList.add('done');tab.classList.remove('active');
+    document.getElementById('progressBar').style.width=(stepDone.filter(Boolean).length/4*100)+'%';
+    if(n<3)goToStep(n+1);
+    else{document.getElementById('completionBanner').style.display='block';document.getElementById('completionBanner').scrollIntoView({behavior:'smooth'});}
+  }
+  function toggleAnswer(btn){
+    const a=btn.nextElementSibling;
+    const v=a.classList.toggle('visible');
+    btn.textContent=v?'▲ 閉じる':'▼ 答えを見る';
+  }
+  function playAudio(){
+    const audio=document.getElementById('audioPlayer');
+    if(audio.paused){audio.play();}else{audio.pause();audio.currentTime=0;}
+  }
+  function selectOpt(el,qid){
+    el.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');quizAnswers[qid]=el;correctAnswers[qid]=el.dataset.correct==='true';
+  }
+  function submitQuiz(){
+    const questions=['q1','q2','q3','q4','q5'];
+    let score=0;
+    const feedbacks={
+      q1:{correct:'正解！「most services can be used free of charge because they are paid for with advertising」が根拠です。',wrong:'不正解。Para 1「paid for with advertising」を確認しよう。'},
+      q2:{correct:'正解！「Conflict and peer pressure … can make it hard for students to get along, leading to fights or bullying」が根拠です。',wrong:'不正解。Para 3の内容を見直そう。'},
+      q3:{correct:'正解！be intent on は「〜に没頭している；〜をたくらんでいる」という意味です。',wrong:'不正解。Para 3のイディオム一覧を見直してみよう。'},
+      q4:{correct:'正解！「parents and their children should decide upon rules, such as limits for use」が根拠です。',wrong:'不正解。Para 4「decide upon rules」を確認しよう。'},
+      q5:{correct:'正解！get in touch with は「〜と連絡を取る」という意味の定番表現です。',wrong:'不正解。Para 1のイディオム「get in touch with」を確認しよう。'},
+    };
+    questions.forEach(q=>{
+      const fb=document.getElementById('fb-'+q);
+      const selected=quizAnswers[q];
+      if(!selected){fb.className='quiz-feedback wrong-fb';fb.textContent='未選択。必ず選んでから採点してね。';return;}
+      const isCorrect=correctAnswers[q];
+      if(isCorrect)score++;
+      selected.classList.remove('selected');
+      selected.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect)selected.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>{if(o.dataset.correct==='true')o.classList.add('correct');});
+      fb.className='quiz-feedback '+(isCorrect?'correct-fb':'wrong-fb');
+      fb.textContent=(isCorrect?'✓ ':'✗ ')+feedbacks[q][isCorrect?'correct':'wrong'];
+    });
+    const result=document.getElementById('quizResult');
+    result.style.display='block';
+    document.getElementById('scoreNum').textContent=score+'/5';
+    const msgs=['💪 もう一度本文を読み直してチャレンジしてみよう！','💪 もう一度本文を読み直してチャレンジしてみよう！','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','👏 よくできました！あと一息！','🎉 満点！素晴らしい理解力です！'];
+    document.getElementById('scoreMsg').textContent=msgs[score];
+    document.getElementById('toStep4Btn').style.display='flex';
+    result.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'accept A as B',ja:'AをBとして認める；受け入れる'},
+    {en:'get in touch with ~',ja:'〜と連絡を取る'},
+    {en:'free of charge',ja:'無料で'},
+    {en:'look to ~ (for ...)',ja:'（…を求めるのに）〜を頼みにする'},
+    {en:'ask a favor of ~',ja:'〜にお願いする〔頼む〕'},
+    {en:'pick up ~',ja:'〜を取り上げる；〜（預けてあるもの）を受け取る'},
+    {en:'be absent from ~',ja:'〜を欠席している'},
+    {en:'let O do',ja:'Oに…させる（使役・許可）'},
+    {en:'get along (with ~)',ja:'（〜と）うまくやっていく；暮らしていく'},
+    {en:'be intent on [upon] ~',ja:'〜に没頭している；〜をたくらんでいる'},
+    {en:'as ～ as ＋数詞',ja:'（…と同じほど）〜も'},
+    {en:'behind the times',ja:'時代遅れの'},
+    {en:'decide on [upon] ~',ja:'〜を選ぶ；〜を決定する'},
+    {en:'stay away from ~',ja:'〜に近づかない；〜を欠席する'},
+    {en:'in public',ja:'人前で；公然と'},
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
+</script>
+
+</body>
+</html>
